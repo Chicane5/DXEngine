@@ -33,6 +33,13 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 {
 	auto result = false;
 
+	//load in the model data
+	//result = LoadModel(modelFilename);
+	//if (!result)
+	//{
+		//return false;
+	//}
+
 	//init the vertex and index buffer that will hold the geo for the triangle
 	result = this->InitializeBuffers(device);
 	if (!result)

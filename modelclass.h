@@ -12,6 +12,8 @@
 #include <DirectXMath.h>
 #include "textureclass.h"
 #include <memory>
+#include <vector>
+#include <fstream>
 
 using namespace DirectX;
 
@@ -29,6 +31,15 @@ private:
 		XMFLOAT3 normal;
 	};
 
+	//structure representing 3d model type
+
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+
 public:
 	ModelClass();
 	ModelClass(const ModelClass&);
@@ -36,7 +47,7 @@ public:
 
 //The functions here handle initializing and shutdown of the model's vertex and index buffers. The Render function puts the model geometry on the video card to prepare it for drawing by the color shader.
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*);
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*); //adding filename for model to be loaded
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
@@ -51,6 +62,10 @@ private:
 	bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, char*);
 	void ReleaseTexture();
 
+	//model loading/unloading from text file
+	bool LoadModel(char*);
+	void ReleaseModel();
+
 private:
 	std::shared_ptr<ID3D11Buffer> m_vertexBuffer;
 	std::shared_ptr<ID3D11Buffer> m_indexBuffer;
@@ -58,6 +73,7 @@ private:
 	int m_indexCount;
 
 	std::shared_ptr<TextureClass> m_Texture;
+	std::vector<ModelType> m_model;
 
 
 
