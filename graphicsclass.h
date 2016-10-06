@@ -42,6 +42,7 @@ public:
 	bool Initialize(int, int, HWND);
 	void Shutdown();
 	bool Frame();
+	std::shared_ptr<CameraClass> GetCamera();
 
 private:
 	bool Render(float);

@@ -47,7 +47,7 @@ public:
 
 //The functions here handle initializing and shutdown of the model's vertex and index buffers. The Render function puts the model geometry on the video card to prepare it for drawing by the color shader.
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*); //adding filename for model to be loaded
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, char*); //adding filename for model to be loaded
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 

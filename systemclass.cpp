@@ -1,4 +1,5 @@
 #include "systemclass.h"
+#define BACKWARD 0x73
 
 SystemClass::SystemClass()
 	: m_Input(nullptr)
@@ -115,7 +116,14 @@ bool SystemClass::Frame()
 	// Check if the user pressed escape and wants to exit the application.
 	if (m_Input->IsKeyDown(VK_ESCAPE))
 	{
+
 		return false;
+	}
+	else if (m_Input->IsKeyDown(VK_DOWN))
+	{
+		std::shared_ptr<CameraClass> lcam = m_Graphics->GetCamera();
+		XMFLOAT3 temp = lcam->GetPosition();
+		lcam->SetPosition(temp.x, temp.y, temp.z - 10);
 	}
 
 	// Do the frame processing for the graphics object.

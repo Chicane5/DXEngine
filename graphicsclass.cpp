@@ -52,7 +52,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	//set the initial position of the camera
-	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -100.0f);
 	m_Camera->SetRotation(0.0f, 0.0f, 0.0f);
 
 	//create the model object
@@ -63,7 +63,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	//init the model object
-	result = m_Model->Initialize(m_D3D->GetDevice().get(), m_D3D->GetDeviceContext().get(), "uv_checker.tga");
+	result = m_Model->Initialize(m_D3D->GetDevice().get(), m_D3D->GetDeviceContext().get(), "uv_checker.tga", "model.txt");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -114,7 +114,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	//The color of the light is set to purple and the light direction is set to point down the positive Z axis.
 
 	// Initialize the light object.
-	m_Light->SetDiffuseColor(1.0f, 0.0f, 1.0f, 1.0f);
+	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
 
 	return true;
@@ -173,6 +173,11 @@ bool GraphicsClass::Frame()
 	}
 
 	return true;
+}
+
+std::shared_ptr<CameraClass> GraphicsClass::GetCamera()
+{
+	return m_Camera;
 }
 
 

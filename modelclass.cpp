@@ -29,16 +29,16 @@ ModelClass::~ModelClass()
 //The Initialize function will call the initialization functions for the vertex and index buffers.
 //Initialize now takes as input the file name of the texture that the model will be using as well as the device context.
 
-bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename, char* modelFilename)
 {
 	auto result = false;
 
 	//load in the model data
-	//result = LoadModel(modelFilename);
-	//if (!result)
-	//{
-		//return false;
-	//}
+	result = LoadModel(modelFilename);
+	if (!result)
+	{
+		return false;
+	}
 
 	//init the vertex and index buffer that will hold the geo for the triangle
 	result = this->InitializeBuffers(device);
@@ -102,10 +102,11 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 
-	//First create two temporary arrays to hold the vertex and index data that we will use later to populate the final buffers wit
-
+	/*
+	well no longer manually set the vertex and index count here - we'll read it from the file
 	m_vertexCount = 4;
 	m_indexCount = 6;
+	*/
 
 	//create the vertex array
 	vertices.reset(new VertexType[m_vertexCount]);
@@ -121,40 +122,19 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 		return false;
 	}
 
-	//now fill both the index and vertex array with the 3 points of the triangle, and well as the index to each of the points. Note points are created in a clockwise order of drawing them
-	//If yo9u do this counter clockwise, it will think the triangle is facing the opposite way and not draw it due to backface culling. REMEMBER the order you send vertices to the GPU is very 
-	//important. Color is set too, since its part of the vertex description.
+	//loading the vertex arrays has changed a bit - instead of setting the values manually we loop thru all the elements in the 
+	//new m_model vector and copy that data into vertex array. The index array is easy to build since each vertex we load has the same index number
+	//as the position in the array it was loaded into
 
-	//now has a texture coordinate component instead of a color. 
-	//adding a normal comopnent for lighting
+	//load the vertex array and index array with data
+	for (auto i = 0; i < m_vertexCount; i++)
+	{
+		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 
-	//load the vertex array with data:
-	// Load the vertex array with data.
-	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  // Bottom left.
-	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f); //normal facing viewer
-
-	vertices[1].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);  // Top left.
-	vertices[1].texture = XMFLOAT2(0.0f, 0.0f);
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f); //normal facing viewer
-
-	vertices[2].position = XMFLOAT3(1.0f, 1.0f, 0.0f);  // top right.
-	vertices[2].texture = XMFLOAT2(1.0f, 0.0f);
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f); //normal facing viewer
-
-	vertices[3].position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	vertices[3].texture = XMFLOAT2(1.0f, 1.0f);
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f); //normal facing viewer
-
-
-	// Load the index array with data.
-	indices[0] = 0;  // Bottom left.
-	indices[1] = 1;  // Top left.
-	indices[2] = 2;  // top right.
-
-	indices[3] = 0;  // Bottom left.
-	indices[4] = 2;  // Top right.
-	indices[5] = 3;  // Bottom right.
+		indices[i] = i;
+	}
 	
 	/*
 	With the vertex array and index array filled out we can now use those to create the vertex buffer and index buffer.
@@ -283,5 +263,69 @@ void ModelClass::ReleaseTexture()
 		m_Texture->Shutdown();
 	}
 
+	return;
+}
+
+//model loading function
+bool ModelClass::LoadModel(char* filename)
+{
+	std::ifstream fin;
+	char input;
+	
+	//open the file
+	fin.open(filename);
+
+	//if it cant be opened then bail
+	if (fin.fail())
+	{
+		return false;
+	}
+
+	//read up to the value of vertex count
+	fin.get(input);
+	while (input != ':')
+	{
+		fin.get(input);
+	}
+
+	//read the vertex count
+	fin >> m_vertexCount;
+	m_indexCount = m_vertexCount;
+
+
+
+	// Read up to the beginning of the data.
+	fin.get(input);
+	while (input != ':')
+	{
+		fin.get(input);
+	}
+	fin.get(input);
+	fin.get(input);
+
+	m_model.clear();
+
+	//read in the vertex data
+	for (auto i = 0; i < m_vertexCount; i++)
+	{
+		ModelType lTempModel;
+		fin >> lTempModel.x >> lTempModel.y >> lTempModel.z;
+		fin >> lTempModel.tu >> lTempModel.tv;
+		fin >> lTempModel.nx >> lTempModel.ny >> lTempModel.nz;
+
+		m_model.push_back(lTempModel);
+	}
+
+	// Close the model file.
+	fin.close();
+
+	return true;
+	
+}
+
+void ModelClass::ReleaseModel()
+{
+
+	m_model.clear();
 	return;
 }
